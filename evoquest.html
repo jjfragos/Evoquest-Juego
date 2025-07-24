@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EvoQuest: Viaje a Través del Tiempo Geológico</title>
+    <!-- Carga de Tailwind CSS para estilos modernos y responsivos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de la fuente Inter para una mejor legibilidad -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos generales del cuerpo */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Fondo gris-azulado claro */
+            color: #333; /* Texto oscuro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Altura mínima de la ventana */
+            margin: 0;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        /* Contenedor principal del juego */
+        .game-container {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* Bordes más redondeados */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Sombra suave */
+            width: 100%;
+            max-width: 600px; /* Ancho máximo para pantallas más grandes */
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem;
+            position: relative;
+        }
+        /* Estilos del encabezado del juego */
+        .header {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0; /* Separador */
+        }
+        .header h1 {
+            font-size: 2.25rem; /* Tamaño de título grande */
+            font-weight: 700; /* Negrita */
+            color: #1a202c; /* Color de texto oscuro */
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            font-size: 1rem;
+            color: #4a5568; /* Color de texto medio */
+        }
+        /* Estilos para títulos de sección */
+        .section-title {
+            font-size: 1.5rem; /* Tamaño de título de sección */
+            font-weight: 700;
+            color: #2d3748; /* Color de texto oscuro */
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        /* Estilos generales para botones */
+        .button {
+            background-color: #4CAF50; /* Verde */
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 9999px; /* Completamente redondeado */
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para profundidad */
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2); /* Sombra de texto */
+            position: relative;
+            overflow: hidden; /* Para el efecto de brillo */
+        }
+        .button:hover {
+            background-color: #45a049; /* Verde más oscuro al pasar el ratón */
+            transform: translateY(-2px); /* Pequeño levantamiento */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Sombra más grande */
+        }
+        .button:active {
+            transform: translateY(0); /* Vuelve a la posición original al hacer clic */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra reducida */
+        }
+        /* Efecto de brillo en el botón al pasar el ratón */
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: rgba(255, 255, 255, 0.2); /* Blanco semitransparente */
+            border-radius: 50%;
+            transition: all 0.75s ease-out;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+        }
+        .button:hover::before {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        /* Contenedor de selección de era */
+        .era-selection {
+            display: flex;
+            flex-wrap: wrap; /* Permite que los botones se envuelvan en varias líneas */
+            justify-content: center;
+            gap: 0.75rem; /* Espacio entre botones */
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+        /* Estilos para los botones de era */
+        .era-button {
+            background-color: #6366f1; /* Índigo */
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.75rem; /* Bordes redondeados */
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .era-button:hover {
+            background-color: #4f46e5; /* Índigo más oscuro al pasar el ratón */
+            transform: translateY(-1px);
+        }
+        .era-button.active {
+            background-color: #2563eb; /* Azul más oscuro cuando está activo */
+            transform: scale(1.05); /* Ligeramente más grande */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Sección del mapa */
+        .map-section {
+            background-color: #e2e8f0; /* Fondo gris-azulado claro */
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            width: 100%;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .map-section img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .map-info {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #2d3748;
+            margin-top: 0.5rem;
+        }
+        /* Placeholder para la imagen del mapa */
+        .map-image-placeholder {
+            width: 90%;
+            height: 150px;
+            background-color: #a0aec0; /* Gris */
+            border-radius: 0.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            background-size: cover; /* Para que la imagen cubra el área */
+            background-position: center; /* Centra la imagen */
+        }
+        
+        /* Modal de fósiles */
+        .fossil-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); /* Fondo semitransparente oscuro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .fossil-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: relative;
+            transform: translateY(20px); /* Efecto de entrada */
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .fossil-modal.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .modal-content h3 {
+            font-size: 1.75rem; /* Tamaño de título del modal */
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 1rem;
+        }
+        .modal-content img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain; /* Ajusta la imagen sin distorsionarla */
+            background-color: #edf2f7; /* Fondo de imagen claro */
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .modal-content p {
+            font-size: 1rem;
+            color: #4a5568;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        /* Estilos para el botón de cerrar modal */
+        .modal-close-btn {
+            background-color: #ef4444; /* Rojo */
+            margin-top: 1rem;
+        }
+        .modal-close-btn:hover {
+            background-color: #dc2626; /* Rojo más oscuro */
+        }
+
+        /* Mostrar ID de usuario (para depuración y multijugador si se implementa) */
+        .user-id-display {
+            font-size: 0.75rem; /* Letra pequeña */
+            color: #718096; /* Gris */
+            word-break: break-all; /* Rompe palabras largas para evitar desbordamiento */
+            margin-top: 1rem;
+            text-align: center;
+            padding-top: 0.5rem;
+            border-top: 1px solid #e2e8f0;
+            width: 100%;
+        }
+
+        /* Spinner de carga */
+        .loading-spinner {
+            display: none; /* Oculto por defecto */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8); /* Fondo semitransparente */
+            justify-content: center;
+            align-items: center;
+            z-index: 1001; /* Por encima de otros elementos */
+            border-radius: 1.5rem;
+        }
+        .loading-spinner.show {
+            display: flex; /* Muestra el spinner */
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #6366f1; /* Color de la parte que gira */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite; /* Animación de giro */
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Spinner de carga, visible durante la inicialización de Firebase -->
+        <div class="loading-spinner" id="loadingSpinner">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Encabezado del juego -->
+        <div class="header">
+            <h1>EvoQuest: Viaje a Través del Tiempo Geológico</h1>
+            <p>Explora eras, descubre fósiles y aprende sobre la evolución.</p>
+        </div>
+
+        <!-- Sección de selección de era -->
+        <div class="section-title">Selecciona una Era Geológica</div>
+        <div class="era-selection" id="eraSelection">
+            <!-- Los botones de las eras se insertarán aquí dinámicamente con JavaScript -->
+        </div>
+
+        <!-- Sección de exploración del mapa -->
+        <div class="map-section">
+            <h2 id="currentEraDisplay" class="section-title"></h2>
+            <!-- Placeholder para la imagen del mapa continental -->
+            <div id="mapImagePlaceholder" class="map-image-placeholder">
+                Mapa Continental
+            </div>
+            <p id="eraInfo" class="map-info"></p>
+            <!-- Botón para excavar fósiles -->
+            <button id="digButton" class="button mt-4 bg-blue-500 hover:bg-blue-600">
+                ¡Excavar un Fósil!
+            </button>
+        </div>
+
+        <!-- Modal para mostrar detalles de los fósiles encontrados -->
+        <div id="fossilModal" class="fossil-modal">
+            <div class="modal-content">
+                <h3 id="fossilName"></h3>
+                <img id="fossilImage" src="" alt="Fósil encontrado">
+                <p id="fossilDescription"></p>
+                <button id="closeModalButton" class="button modal-close-btn">Cerrar</button>
+            </div>
+        </div>
+
+        <!-- Muestra el ID de usuario, útil para depuración y funciones de guardado -->
+        <div class="user-id-display" id="userIdDisplay">
+            ID de Usuario: Cargando...
+        </div>
+    </div>
+
+    <!-- Script de Firebase SDKs -->
+    <script type="module">
+        // Importa los módulos necesarios de Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Variables globales proporcionadas por el entorno Canvas
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app; // Instancia de la aplicación Firebase
+        let db; // Instancia de Firestore
+        let auth; // Instancia de autenticación
+        let currentUserId = null; // ID del usuario actual
+        let authReady = false; // Bandera para saber si la autenticación está lista
+
+        // Datos de las eras geológicas con información y fósiles asociados
+        const geologicalEras = [
+            {
+                id: "cenozoic",
+                name: "Cenozoico",
+                period: "Hace 66 millones de años - Presente",
+                map: "https://placehold.co/400x250/AEC6CF/FFFFFF?text=Mapa+Cenozoico", // Placeholder para el mapa continental
+                info: "La 'Era de los Mamíferos'. Los continentes están en su posición actual. Observa la evolución y diversificación de la megafauna.",
+                fossils: ["Mamut", "Homínido", "Smilodon"]
+            },
+            {
+                id: "mesozoic",
+                name: "Mesozoico",
+                period: "Hace 252 - 66 millones de años",
+                map: "https://placehold.co/400x250/FFDDC1/000000?text=Mapa+Mesozoico", // Placeholder para el mapa continental
+                info: "La 'Era de los Dinosaurios'. El supercontinente Pangea se fragmenta, iniciando la deriva continental que formaría los continentes actuales.",
+                fossils: ["Tyrannosaurus Rex", "Triceratops", "Archaeopteryx"]
+            },
+            {
+                id: "paleozoic",
+                name: "Paleozoico",
+                period: "Hace 541 - 252 millones de años",
+                map: "https://placehold.co/400x250/B5EAD7/000000?text=Mapa+Paleozoico", // Placeholder para el mapa continental
+                info: "La 'Era de los Invertebrados y Peces'. Se forman grandes masas de tierra que eventualmente se unirían para formar Pangea, con una explosión de vida marina.",
+                fossils: ["Trilobite", "Peces acorazados", "Ammonite"]
+            }
+        ];
+
+        // Datos de los fósiles con descripciones que enfatizan conceptos evolutivos
+        const fossilsData = {
+            "Mamut": {
+                era: "cenozoic",
+                image: "https://placehold.co/120x120/EDF2F7/000000?text=Mamut",
+                description: "Los mamuts son un ejemplo de evolución y adaptación a climas fríos. Su estructura ósea es **homóloga** a la de otros mamíferos, mostrando la diversidad dentro de un plan corporal común heredado de un ancestro."
+            },
+            "Homínido": {
+                era: "cenozoic",
+                image: "https://placehold.co/120x120/EDF2F7/000000?text=Hominido",
+                description: "Los fósiles de homínidos revelan la **evolución biológica** de nuestra propia especie, mostrando cambios graduales en la anatomía a lo largo de millones de años. Nos permiten trazar nuestra línea evolutiva."
+            },
+            "Smilodon": {
+                era: "cenozoic",
+                image: "https://placehold.co/120x120/EDF2F7/000000?text=Smilodon",
+                description: "El Smilodon o 'diente de sable' es un carnívoro extinto con adaptaciones especializadas, como sus largos caninos, mostrando cómo la **evolución** puede conducir a formas extremas en respuesta a presiones ambientales y nichos ecológicos."
+            },
+            "Tyrannosaurus Rex": {
+                era: "mesozoic",
+                image: "https://placehold.co/120x120/EDF2F7/000000?text=T-Rex",
+                description: "Uno de los depredadores más grandes, representa la culminación de la evolución de los grandes terópodos. Sus extremidades anteriores, aunque pequeñas, son **órganos homólogos** a las de otros vertebrados, indicando un ancestro común y un plan corporal modificado."
+            },
+            "Triceratops": {
+                era: "mesozoic",
+                image: "https://placehold.co/120x120/EDF2F7/000000?text=Triceratops",
+                description: "Dinosaurio herbívoro con una gran cresta ósea y tres cuernos. Su éxito durante el Cretácico superior es un testimonio de la diversidad y adaptación de los dinosaurios. Son fósiles clave para entender la **escala geológica** de la era Mesozoica."
+            },
+            "Archaeopteryx": {
+                era: "mesozoic",
+                image: "https://placehold.co/120x120/EDF2F7/000000?text=Archaeopteryx",
+                description: "Considerado un **fósil de transición** clave, mostrando características de dinosaurios (dientes, cola larga) y aves (plumas, alas). Sus huesos del ala son **homólogos** a los de otros tetrápodos, ilustrando la evolución de las aves a partir de los dinosaurios. Un gran ejemplo de la **ontogenia** en la evolución es cómo las estructuras embrionarias reflejan estas conexiones ancestrales."
+            },
+            "Trilobite": {
+                era: "paleozoic",
+                image: "https://placehold.co/120x120/EDF2F7/000000?text=Trilobite",
+                description: "Fósiles marinos antiguos y muy abundantes del Paleozoico. Su amplia distribución geográfica en rocas de diferentes continentes hoy separados es una fuerte evidencia de la **paleobiogeografía** y la **deriva continental**, mostrando que estos continentes estuvieron unidos en el pasado."
+            },
+            "Peces acorazados": {
+                era: "paleozoic",
+                image: "https://placehold.co/120x120/EDF2F7/000000?text=Peces+Acorazados",
+                description: "Los placodermos, o peces acorazados, fueron de los primeros vertebrados con mandíbulas, una **innovación evolutiva** crucial. Sus armaduras óseas son una adaptación defensiva primitiva, marcando un hito en la **evolución de los vertebrados**."
+            },
+            "Ammonite": {
+                era: "paleozoic", 
+                image: "https://placehold.co/120x120/EDF2F7/000000?text=Ammonite",
+                description: "Cefalópodos marinos extintos con conchas en espiral. Fueron muy diversos y abundantes en los océanos del Paleozoico y Mesozoico, sirviendo como excelentes **fósiles índice** para la **datación geológica** y la comprensión de la biodiversidad marina antigua."
+            }
+        };
+
+        let currentEraId = geologicalEras[0].id; // La era actual del juego, por defecto la primera
+        let collectedFossils = []; // Array para almacenar los nombres de los fósiles recolectados
+
+        // Referencias a los elementos del DOM
+        const eraSelectionDiv = document.getElementById('eraSelection');
+        const currentEraDisplay = document.getElementById('currentEraDisplay');
+        const mapImagePlaceholder = document.getElementById('mapImagePlaceholder');
+        const eraInfo = document.getElementById('eraInfo');
+        const digButton = document.getElementById('digButton');
+        const fossilModal = document.getElementById('fossilModal');
+        const fossilName = document.getElementById('fossilName');
+        const fossilImage = document.getElementById('fossilImage');
+        const fossilDescription = document.getElementById('fossilDescription');
+        const closeModalButton = document.getElementById('closeModalButton');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        /**
+         * Muestra el spinner de carga.
+         */
+        function showLoading() {
+            loadingSpinner.classList.add('show');
+        }
+
+        /**
+         * Oculta el spinner de carga.
+         */
+        function hideLoading() {
+            loadingSpinner.classList.remove('show');
+        }
+
+        /**
+         * Inicializa Firebase y autentica al usuario.
+         * Carga el progreso del juego después de la autenticación.
+         */
+        async function initializeFirebase() {
+            try {
+                showLoading(); // Muestra el spinner mientras se inicializa
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Autentica al usuario. Si hay un token, úsalo; de lo contrario, inicia sesión anónimamente.
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Escucha cambios en el estado de autenticación
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        currentUserId = user.uid; // Establece el ID del usuario
+                        userIdDisplay.textContent = `ID de Usuario: ${currentUserId}`;
+                        authReady = true; // La autenticación está lista
+                        await loadGameProgress(); // Carga el progreso guardado
+                        renderEraButtons(); // Renderiza los botones de las eras
+                        updateEraDisplay(currentEraId); // Actualiza la vista de la era
+                    } else {
+                        console.log("No user signed in.");
+                        currentUserId = null;
+                        userIdDisplay.textContent = `ID de Usuario: No autenticado`;
+                        authReady = true;
+                        renderEraButtons();
+                        updateEraDisplay(currentEraId);
+                    }
+                    hideLoading(); // Oculta el spinner una vez que la autenticación está completa
+                });
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+                userIdDisplay.textContent = `Error al cargar ID de usuario.`;
+                hideLoading();
+            }
+        }
+
+        /**
+         * Guarda el progreso actual del juego en Firestore.
+         * Incluye la era actual y los fósiles recolectados.
+         */
+        async function saveGameProgress() {
+            // Asegúrate de que Firebase esté listo y haya un usuario autenticado
+            if (!authReady || !currentUserId) {
+                console.warn("Firebase no está listo o no hay usuario autenticado. No se puede guardar el progreso.");
+                return;
+            }
+            try {
+                // Define la referencia al documento de progreso del usuario
+                const userProgressRef = doc(db, `artifacts/${appId}/users/${currentUserId}/gameProgress`, "progressDoc");
+                // Guarda los datos, fusionándolos con los existentes si los hay
+                await setDoc(userProgressRef, {
+                    currentEra: currentEraId,
+                    collectedFossils: collectedFossils
+                }, { merge: true });
+                console.log("Progreso guardado.");
+            } catch (error) {
+                console.error("Error al guardar el progreso:", error);
+            }
+        }
+
+        /**
+         * Carga el progreso del juego desde Firestore.
+         * Si no hay progreso guardado, inicializa un nuevo juego y lo guarda.
+         */
+        async function loadGameProgress() {
+            // Asegúrate de que Firebase esté listo y haya un usuario autenticado
+            if (!authReady || !currentUserId) {
+                console.warn("Firebase no está listo o no hay usuario autenticado. No se puede cargar el progreso.");
+                return;
+            }
+            try {
+                // Define la referencia al documento de progreso del usuario
+                const userProgressRef = doc(db, `artifacts/${appId}/users/${currentUserId}/gameProgress`, "progressDoc");
+                const docSnap = await getDoc(userProgressRef); // Obtiene el documento
+
+                if (docSnap.exists()) {
+                    // Si el documento existe, carga los datos
+                    const data = docSnap.data();
+                    currentEraId = data.currentEra || geologicalEras[0].id; // Usa la era guardada o la primera por defecto
+                    collectedFossils = data.collectedFossils || []; // Carga los fósiles recolectados
+                    console.log("Progreso cargado:", data);
+                } else {
+                    // Si no hay progreso guardado, inicia un nuevo juego y lo guarda
+                    console.log("No se encontró progreso guardado. Iniciando nuevo juego.");
+                    await saveGameProgress();
+                }
+            } catch (error) {
+                console.error("Error al cargar el progreso:", error);
+            }
+        }
+
+        /**
+         * Renderiza los botones de selección de era dinámicamente.
+         * Marca el botón de la era actual como activo.
+         */
+        function renderEraButtons() {
+            eraSelectionDiv.innerHTML = ''; // Limpia los botones existentes
+            geologicalEras.forEach(era => {
+                const button = document.createElement('button');
+                button.textContent = era.name;
+                button.classList.add('era-button');
+                if (era.id === currentEraId) {
+                    button.classList.add('active'); // Añade clase 'active' si es la era actual
+                }
+                button.onclick = () => selectEra(era.id); // Asigna el evento de clic
+                eraSelectionDiv.appendChild(button);
+            });
+        }
+
+        /**
+         * Cambia la era geológica actual.
+         * @param {string} eraId - El ID de la era a seleccionar.
+         */
+        function selectEra(eraId) {
+            currentEraId = eraId; // Actualiza la era actual
+            updateEraDisplay(eraId); // Actualiza la interfaz del mapa
+            renderEraButtons(); // Vuelve a renderizar los botones para actualizar el estado activo
+            saveGameProgress(); // Guarda el cambio de era
+        }
+
+        /**
+         * Actualiza la visualización del mapa y la información de la era.
+         * @param {string} eraId - El ID de la era a mostrar.
+         */
+        function updateEraDisplay(eraId) {
+            const era = geologicalEras.find(e => e.id === eraId); // Encuentra la era por su ID
+            if (era) {
+                currentEraDisplay.textContent = `Estás en la Era ${era.name}`;
+                // Establece la imagen de fondo del placeholder del mapa
+                mapImagePlaceholder.style.backgroundImage = `url('${era.map}')`;
+                mapImagePlaceholder.textContent = ''; // Oculta el texto si la imagen se carga
+                eraInfo.textContent = `${era.period}. ${era.info}`; // Muestra la información de la era
+            }
+        }
+
+        /**
+         * Muestra el modal con la información del fósil.
+         * @param {object} fossil - Objeto que contiene los datos del fósil.
+         */
+        function showFossilModal(fossil) {
+            fossilName.textContent = fossil.name || "Fósil Desconocido";
+            fossilImage.src = fossil.image || "https://placehold.co/120x120/EDF2F7/000000?text=Fósil";
+            fossilImage.alt = fossil.name || "Fósil";
+            fossilDescription.textContent = fossil.description || "No hay descripción disponible.";
+            fossilModal.classList.add('show'); // Añade la clase 'show' para mostrar el modal
+        }
+
+        /**
+         * Oculta el modal del fósil.
+         */
+        function hideFossilModal() {
+            fossilModal.classList.remove('show'); // Quita la clase 'show' para ocultar el modal
+        }
+
+        // Event listener para el botón "Excavar un Fósil!"
+        digButton.addEventListener('click', () => {
+            const era = geologicalEras.find(e => e.id === currentEraId);
+            if (!era || era.fossils.length === 0) {
+                console.log("No hay fósiles disponibles para excavar en esta era.");
+                return;
+            }
+
+            // Selecciona un fósil aleatorio de la era actual
+            const randomIndex = Math.floor(Math.random() * era.fossils.length);
+            const foundFossilName = era.fossils[randomIndex];
+            const foundFossil = fossilsData[foundFossilName];
+
+            if (foundFossil) {
+                // Añade el fósil a la lista de recolectados si no está ya
+                if (!collectedFossils.includes(foundFossilName)) {
+                    collectedFossils.push(foundFossilName);
+                    saveGameProgress(); // Guarda el progreso después de encontrar un nuevo fósil
+                }
+                // Muestra el modal con los detalles del fósil
+                showFossilModal({ name: foundFossilName, ...foundFossil });
+            } else {
+                console.log("Error: El fósil seleccionado no tiene datos completos.");
+            }
+        });
+
+        // Event listener para el botón de cerrar el modal
+        closeModalButton.addEventListener('click', hideFossilModal);
+
+        // Inicializa Firebase y carga el juego cuando la ventana se haya cargado completamente
+        window.onload = initializeFirebase;
+    </script>
+</body>
+</html>
